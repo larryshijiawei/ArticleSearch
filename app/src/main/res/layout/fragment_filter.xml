@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center">
+
+
+    <TextView
+        android:layout_width="100dp"
+        android:layout_height="30dp"
+        android:text="Begin Date"
+        android:textSize="17dp"
+        android:id="@+id/tv_filter_beginDate"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="120dp" />
+
+    <EditText
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:id="@+id/et_filter_beginDate"
+        android:layout_marginTop="100dp"
+        android:layout_toRightOf="@+id/tv_filter_beginDate"
+        android:layout_marginLeft="50dp"/>
+
+    <TextView
+        android:layout_width="100dp"
+        android:layout_height="30dp"
+        android:id="@+id/tv_filter_sortOrder"
+        android:text="Sort Order"
+        android:textSize="17dp"
+        android:layout_marginTop="200dp"
+        android:layout_marginLeft="20dp"
+        />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save"
+        android:id="@+id/btn_saveFilter"
+        android:layout_marginTop="300dp"
+        android:layout_centerHorizontal="true" />
+
+
+</RelativeLayout>

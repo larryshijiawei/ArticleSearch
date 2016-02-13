@@ -1,5 +1,6 @@
 package com.example.jiaweishi.articlesearch.activities;
 
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,9 +12,12 @@ import android.view.View;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import com.example.jiaweishi.articlesearch.R;
 import com.example.jiaweishi.articlesearch.adapters.ArticleAdapter;
+import com.example.jiaweishi.articlesearch.fragment.FilterFragment;
+import com.example.jiaweishi.articlesearch.fragment.FilterFragmentCallback;
 import com.example.jiaweishi.articlesearch.models.Article;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -28,7 +32,7 @@ import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 
-public class ArticleListActivity extends AppCompatActivity {
+public class ArticleListActivity extends AppCompatActivity implements FilterFragmentCallback{
     private final String TAG = ArticleListActivity.class.getSimpleName();
 
     private final String baseUrl = "http://api.nytimes.com/svc/search/v2/articlesearch.json";
@@ -68,6 +72,23 @@ public class ArticleListActivity extends AppCompatActivity {
         });
 
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        //Activate once the "settings" option is selected
+        if(item.getItemId() == R.id.action_settings){
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FilterFragment filterDialog = FilterFragment.getInstance(this);
+            filterDialog.show(fragmentManager, "filter");
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onFilterSaved() {
+        Toast.makeText(getApplicationContext(), "Save Filter", Toast.LENGTH_LONG).show();
     }
 
     private void fetchArticles(String keyword){
