@@ -5,7 +5,6 @@
     android:layout_height="wrap_content"
     android:gravity="center">
 
-
     <TextView
         android:layout_width="100dp"
         android:layout_height="30dp"
@@ -30,16 +29,68 @@
         android:text="Sort Order"
         android:textSize="17dp"
         android:layout_marginTop="200dp"
-        android:layout_marginLeft="20dp"
-        />
+        android:layout_marginLeft="20dp" />
+
+    <Spinner
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/sp_filter_sortOrder"
+        android:layout_above="@+id/tv_filter_category"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignLeft="@+id/et_filter_beginDate"
+        android:layout_alignStart="@+id/et_filter_beginDate" />
+
+    <TextView
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/tv_filter_category"
+        android:text="News Desk Values"
+        android:textSize="17dp"
+        android:layout_below="@+id/tv_filter_sortOrder"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="20dp" />
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Arts"
+        android:id="@+id/cb_filter_category_arts"
+        android:layout_alignTop="@+id/tv_filter_category"
+        android:layout_alignLeft="@+id/et_filter_beginDate"
+        android:layout_alignStart="@+id/et_filter_beginDate" />
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Fashion Styles"
+        android:id="@+id/cb_filter_category_fashion"
+        android:layout_below="@+id/cb_filter_category_arts"
+        android:layout_alignLeft="@+id/cb_filter_category_arts"
+        android:layout_alignStart="@+id/cb_filter_category_arts" />
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sports"
+        android:id="@+id/cb_filter_category_sports"
+        android:layout_below="@+id/cb_filter_category_fashion"
+        android:layout_alignLeft="@+id/cb_filter_category_fashion"
+        android:layout_alignStart="@+id/cb_filter_category_fashion" />
+
+
+
+
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Save"
         android:id="@+id/btn_saveFilter"
-        android:layout_marginTop="300dp"
+        android:layout_marginTop="400dp"
         android:layout_centerHorizontal="true" />
+
+
 
 
 </RelativeLayout>

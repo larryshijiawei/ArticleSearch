@@ -19,6 +19,7 @@ import com.example.jiaweishi.articlesearch.adapters.ArticleAdapter;
 import com.example.jiaweishi.articlesearch.fragment.FilterFragment;
 import com.example.jiaweishi.articlesearch.fragment.FilterFragmentCallback;
 import com.example.jiaweishi.articlesearch.models.Article;
+import com.example.jiaweishi.articlesearch.models.Filter;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
@@ -27,6 +28,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,10 +37,16 @@ import cz.msebera.android.httpclient.Header;
 public class ArticleListActivity extends AppCompatActivity implements FilterFragmentCallback{
     private final String TAG = ArticleListActivity.class.getSimpleName();
 
+    //http://api.nytimes.com/svc/search/v2/articlesearch.json?q=new+york
+    // &fq=news_desk:("Sports" "Arts" "Fashion Style")
+    // &begin_date=20160116&end_date=20160201
+    // &api-key=7837482c431734422e608fe4de337f99:2:74353198
+
     private final String baseUrl = "http://api.nytimes.com/svc/search/v2/articlesearch.json";
     private final String apiKey = "7837482c431734422e608fe4de337f99:2:74353198";
 
     private List<Article> mArticleList = new ArrayList<>();
+    private Filter mFilter = new Filter();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,8 +95,9 @@ public class ArticleListActivity extends AppCompatActivity implements FilterFrag
     }
 
     @Override
-    public void onFilterSaved() {
+    public void onFilterSaved(Filter filter) {
         Toast.makeText(getApplicationContext(), "Save Filter", Toast.LENGTH_LONG).show();
+        mFilter = filter;
     }
 
     private void fetchArticles(String keyword){
@@ -148,20 +157,37 @@ public class ArticleListActivity extends AppCompatActivity implements FilterFrag
     private String buildUri(String keyword){
         String uri = baseUrl;
         //keyword like "hello word" should be parsed as "hello-world" in the url
-        String[] segs = keyword.split(" ");
-        String formatedKeyWord = "";
-        for(String seg : segs){
-            if(seg.length() > 0) {
-                if(formatedKeyWord.length() > 0)
-                    formatedKeyWord += "+";
+        if(keyword != null && keyword.length() >0){
+            String[] segs = keyword.split(" ");
+            String formatedKeyWord = "";
+            for(String seg : segs){
+                if(seg.length() > 0) {
+                    if(formatedKeyWord.length() > 0)
+                        formatedKeyWord += "+";
 
-                formatedKeyWord += seg;
+                    formatedKeyWord += seg;
+                }
             }
+
+            uri += "?q=" + formatedKeyWord;
         }
 
-        uri += "?q=" + formatedKeyWord;
+        //apply the filters to
 
-        uri += "&page=1&sort=newest";
+        //apply sort order
+        if(keyword != null && keyword.length() > 0)
+            uri += "&";
+
+        uri += "sort="+ mFilter.getSortOrder();
+
+        if(mFilter.getBeginDate() != null){
+            String dateInfo = new SimpleDateFormat("yyyyMMdd").format(mFilter.getBeginDate());
+            uri += "&begin_date" + dateInfo;
+        }
+
+        //Temporarily add the page count to restrict the size of return
+        uri += "&page=1";
+
 
         uri += "&api-key=" + apiKey;
 

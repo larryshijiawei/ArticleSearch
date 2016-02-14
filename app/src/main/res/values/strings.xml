@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">News Article Search</string>
     <string name="action_settings">Settings</string>
+    
+    <string-array name="sortOrders">
+        <item>Newest</item>
+        <item>Oldest</item>
+    </string-array>
 </resources>
