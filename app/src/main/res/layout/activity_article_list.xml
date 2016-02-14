@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<GridView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/gv_articleList"
-    android:numColumns="4"
-    android:gravity="center"
-    tools:context=".activities.ArticleListActivity">
+    android:orientation="vertical"
+    android:gravity="center">
 
+    <GridView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/gv_articleList"
+        android:numColumns="4"
+        android:gravity="center"
+        tools:context=".activities.ArticleListActivity"/>
 
-
-
-</GridView>
+</RelativeLayout>

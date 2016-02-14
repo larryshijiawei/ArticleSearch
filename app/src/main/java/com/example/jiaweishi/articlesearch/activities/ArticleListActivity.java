@@ -1,5 +1,6 @@
 package com.example.jiaweishi.articlesearch.activities;
 
+import android.content.Intent;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -9,6 +10,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.GridView;
@@ -47,11 +50,13 @@ public class ArticleListActivity extends AppCompatActivity implements FilterFrag
 
     private List<Article> mArticleList = new ArrayList<>();
     private Filter mFilter = new Filter();
+    private int currentPage = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_article_list);
+
     }
 
 
@@ -65,7 +70,6 @@ public class ArticleListActivity extends AppCompatActivity implements FilterFrag
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                Log.d(TAG, " ========= " + query);
                 searchView.clearFocus();
 
                 fetchArticles(query);
@@ -102,11 +106,9 @@ public class ArticleListActivity extends AppCompatActivity implements FilterFrag
 
     private void fetchArticles(String keyword){
         AsyncHttpClient client = new AsyncHttpClient();
-        RequestParams params = new RequestParams();
-        String url = buildUri(keyword);
-        Log.d(TAG, "========= uri to hit is "+url);
+        RequestParams params = getRequestParam(keyword);
 
-        client.get(url, params, new JsonHttpResponseHandler() {
+        client.get(baseUrl, params, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 if (statusCode == 200) {
@@ -147,50 +149,38 @@ public class ArticleListActivity extends AppCompatActivity implements FilterFrag
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Log.d(TAG, "======= click on item "+i);
-                Article article = (Article)adapterView.getItemAtPosition(i);
-                Log.d(TAG, "====== article title is "+article.getHeadline());
+                Article selectedArticle = (Article)adapterView.getItemAtPosition(i);
+
+                Intent intent = new Intent(getApplicationContext(), ArticleDetailActivity.class);
+                intent.putExtra("article", selectedArticle);
+                startActivity(intent);
+
             }
         });
     }
 
-    private String buildUri(String keyword){
-        String uri = baseUrl;
-        //keyword like "hello word" should be parsed as "hello-world" in the url
-        if(keyword != null && keyword.length() >0){
-            String[] segs = keyword.split(" ");
-            String formatedKeyWord = "";
-            for(String seg : segs){
-                if(seg.length() > 0) {
-                    if(formatedKeyWord.length() > 0)
-                        formatedKeyWord += "+";
-
-                    formatedKeyWord += seg;
-                }
-            }
-
-            uri += "?q=" + formatedKeyWord;
+    // Manages the behavior when URLs are loaded
+    private class MyBrowser extends WebViewClient {
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            view.loadUrl(url);
+            return true;
         }
+    }
 
-        //apply the filters to
-
-        //apply sort order
-        if(keyword != null && keyword.length() > 0)
-            uri += "&";
-
-        uri += "sort="+ mFilter.getSortOrder();
-
+    private RequestParams getRequestParam(String keyword){
+        RequestParams requestParams = new RequestParams();
+        requestParams.add("q", keyword);
+        requestParams.add("page", Integer.toString(currentPage));
+        requestParams.add("sort", mFilter.getSortOrder());
         if(mFilter.getBeginDate() != null){
             String dateInfo = new SimpleDateFormat("yyyyMMdd").format(mFilter.getBeginDate());
-            uri += "&begin_date" + dateInfo;
+            requestParams.add("begin_date", dateInfo);
         }
-
-        //Temporarily add the page count to restrict the size of return
-        uri += "&page=1";
+        requestParams.add("api-key", apiKey);
 
 
-        uri += "&api-key=" + apiKey;
-
-        return uri;
+        return requestParams;
     }
+
 }

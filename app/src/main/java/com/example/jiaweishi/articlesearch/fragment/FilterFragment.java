@@ -30,8 +30,6 @@ import org.w3c.dom.Text;
  */
 public class FilterFragment extends DialogFragment {
     private Context mContext;
-    //By default the order is "newest"
-    private String mSortOrder = "newest";
 
     final int[] category_ids = {R.id.cb_filter_category_arts,
             R.id.cb_filter_category_fashion,
@@ -62,7 +60,7 @@ public class FilterFragment extends DialogFragment {
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         getDialog().getWindow().setSoftInputMode(
@@ -87,19 +85,6 @@ public class FilterFragment extends DialogFragment {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
 
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                mSortOrder = (String) adapterView.getItemAtPosition(i);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-
-
 
     }
 
@@ -119,7 +104,8 @@ public class FilterFragment extends DialogFragment {
 
         filter.setBeginDate(et_startDate.getText().toString());
 
-        filter.setSortOrder(mSortOrder);
+        Spinner spinner = (Spinner) view.findViewById(R.id.sp_filter_sortOrder);
+        filter.setSortOrder(spinner.getSelectedItem().toString());
 
         for(int i=0; i<category_ids.length; i++){
             CheckBox checkBox = (CheckBox) view.findViewById(category_ids[i]);

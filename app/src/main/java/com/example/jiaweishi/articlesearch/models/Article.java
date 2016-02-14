@@ -4,14 +4,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
+
 /**
  * Created by jiaweishi on 2/10/16.
  */
-public class Article {
+public class Article implements Serializable{
     private final String URL_PREFIX = "http://www.nytimes.com/";
 
     private String headline;
     private String imageLink;
+    private String webUrl;
 
     public Article(JSONObject json){
         try {
@@ -26,6 +29,8 @@ public class Article {
                 }
             }
 
+            webUrl = json.getString("web_url");
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -37,5 +42,9 @@ public class Article {
 
     public String getImageLink() {
         return imageLink;
+    }
+
+    public String getWebUrl(){
+        return this.webUrl;
     }
 }

@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class Filter {
     private Date beginDate;
-    private String sortOrder;
+    private String sortOrder = "newest";
     private List<String> categories;
 
     public Filter(){
