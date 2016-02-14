@@ -5,10 +5,14 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -22,6 +26,7 @@ import com.example.jiaweishi.articlesearch.adapters.ArticleAdapter;
 import com.example.jiaweishi.articlesearch.fragment.FilterFragment;
 import com.example.jiaweishi.articlesearch.fragment.FilterFragmentCallback;
 import com.example.jiaweishi.articlesearch.models.Article;
+import com.example.jiaweishi.articlesearch.models.EndlessRecyclerViewScrollListener;
 import com.example.jiaweishi.articlesearch.models.Filter;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -50,12 +55,49 @@ public class ArticleListActivity extends AppCompatActivity implements FilterFrag
 
     private List<Article> mArticleList = new ArrayList<>();
     private Filter mFilter = new Filter();
-    private int currentPage = 0;
+    private String mKeyword = null;
+    private ArticleAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_article_list);
+
+        initAdapter();
+
+    }
+
+    private void initAdapter(){
+        RecyclerView rvArticles = (RecyclerView) findViewById(R.id.rvArticles);
+
+        mArticleList = new ArrayList<>();
+        mAdapter = new ArticleAdapter(getApplicationContext(), mArticleList);
+        rvArticles.setAdapter(mAdapter);
+
+        //listener which triggers the webview
+        mAdapter.setOnItemClickListener(new ArticleAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View itemView, int position) {
+                Log.d(TAG, "========= on click item " + position);
+                Article selectedArticle = mArticleList.get(position);
+                Intent intent = new Intent(getApplicationContext(), ArticleDetailActivity.class);
+                intent.putExtra("article", selectedArticle);
+                startActivity(intent);
+            }
+        });
+
+        StaggeredGridLayoutManager gridLayoutManager =
+                new StaggeredGridLayoutManager(4, StaggeredGridLayoutManager.VERTICAL);
+        rvArticles.setLayoutManager(gridLayoutManager);
+
+        //on scroll listener--support endless scroll
+        rvArticles.addOnScrollListener(new EndlessRecyclerViewScrollListener(gridLayoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount) {
+                Log.d(TAG, " ========= scroll on page " + page);
+                fetchArticles(mKeyword, page);
+            }
+        });
 
     }
 
@@ -71,8 +113,8 @@ public class ArticleListActivity extends AppCompatActivity implements FilterFrag
             @Override
             public boolean onQueryTextSubmit(String query) {
                 searchView.clearFocus();
-
-                fetchArticles(query);
+                initAdapter();
+                fetchArticles(query, 0);
 
                 return true;
             }
@@ -104,9 +146,11 @@ public class ArticleListActivity extends AppCompatActivity implements FilterFrag
         mFilter = filter;
     }
 
-    private void fetchArticles(String keyword){
+    private void fetchArticles(String keyword, int page){
+        mKeyword = keyword;
+
         AsyncHttpClient client = new AsyncHttpClient();
-        RequestParams params = getRequestParam(keyword);
+        RequestParams params = getRequestParam(page);
 
         client.get(baseUrl, params, new JsonHttpResponseHandler() {
             @Override
@@ -117,8 +161,6 @@ public class ArticleListActivity extends AppCompatActivity implements FilterFrag
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-
-                    displayArticles();
                 }
             }
 
@@ -129,8 +171,10 @@ public class ArticleListActivity extends AppCompatActivity implements FilterFrag
         });
     }
 
+
+
     private void parseArticleJson(JSONObject json) throws JSONException {
-        mArticleList.clear();
+        //mArticleList.clear();
 
         JSONObject response = json.getJSONObject("response");
         JSONArray docs = response.getJSONArray("docs");
@@ -138,40 +182,14 @@ public class ArticleListActivity extends AppCompatActivity implements FilterFrag
             Article article = new Article(docs.getJSONObject(i));
             mArticleList.add(article);
         }
+        mAdapter.notifyDataSetChanged();
     }
 
-    private void displayArticles(){
-        GridView gridView = (GridView) findViewById(R.id.gv_articleList);
-
-        ArticleAdapter adapter = new ArticleAdapter(this.getApplicationContext(), mArticleList);
-        gridView.setAdapter(adapter);
-
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Article selectedArticle = (Article)adapterView.getItemAtPosition(i);
-
-                Intent intent = new Intent(getApplicationContext(), ArticleDetailActivity.class);
-                intent.putExtra("article", selectedArticle);
-                startActivity(intent);
-
-            }
-        });
-    }
-
-    // Manages the behavior when URLs are loaded
-    private class MyBrowser extends WebViewClient {
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            view.loadUrl(url);
-            return true;
-        }
-    }
-
-    private RequestParams getRequestParam(String keyword){
+    private RequestParams getRequestParam(int page){
         RequestParams requestParams = new RequestParams();
-        requestParams.add("q", keyword);
-        requestParams.add("page", Integer.toString(currentPage));
+        if(mKeyword != null)
+            requestParams.add("q", mKeyword);
+        requestParams.add("page", Integer.toString(page));
         requestParams.add("sort", mFilter.getSortOrder());
         if(mFilter.getBeginDate() != null){
             String dateInfo = new SimpleDateFormat("yyyyMMdd").format(mFilter.getBeginDate());
