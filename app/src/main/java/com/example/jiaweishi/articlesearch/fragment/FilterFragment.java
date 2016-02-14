@@ -1,41 +1,41 @@
 package com.example.jiaweishi.articlesearch.fragment;
 
+
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 
-
 import com.example.jiaweishi.articlesearch.R;
 import com.example.jiaweishi.articlesearch.models.Filter;
 
-import org.w3c.dom.Text;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 /**
  * Created by jiaweishi on 2/12/16.
  */
-public class FilterFragment extends DialogFragment {
+public class FilterFragment extends DialogFragment{
     private Context mContext;
 
     final int[] category_ids = {R.id.cb_filter_category_arts,
             R.id.cb_filter_category_fashion,
             R.id.cb_filter_category_sports};
 
-    final String[] categories = {"Arts", "Fashion Style", "Sports"};
+    final String[] categories = {"Arts", "Fashion & Style", "Sports"};
+
+    private Date mStartDate;
 
     public FilterFragment(){
 
@@ -48,10 +48,11 @@ public class FilterFragment extends DialogFragment {
     public static FilterFragment getInstance(Context context){
         FilterFragment fragment = new FilterFragment();
         fragment.setContext(context);
-        Bundle arg = new Bundle();
-//        arg.putString("title", title);
-        fragment.setArguments(arg);
         return fragment;
+    }
+
+    public void setDateInfo(Date startDate){
+        mStartDate = startDate;
     }
 
     @Override
@@ -78,13 +79,26 @@ public class FilterFragment extends DialogFragment {
             }
         });
 
+        EditText et_datePicker = (EditText) view.findViewById(R.id.et_filter_beginDate);
+        if(mStartDate != null){
+            String dateInfo = new SimpleDateFormat("MM/dd/yyyy").format(mStartDate);
+            et_datePicker.setText(dateInfo);
+        }
+
+        et_datePicker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ((FilterFragmentCallback) mContext).onDatePickerTriggered();
+                dismiss();
+            }
+        });
+
         //spinner
         Spinner spinner = (Spinner) view.findViewById(R.id.sp_filter_sortOrder);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
                 R.array.sortOrders, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-
 
     }
 
@@ -97,12 +111,13 @@ public class FilterFragment extends DialogFragment {
         return super.onCreateDialog(savedInstanceState);
     }
 
+
+
     private Filter fetchFilter(View view){
 
         Filter filter = new Filter();
-        EditText et_startDate = (EditText) view.findViewById(R.id.et_filter_beginDate);
 
-        filter.setBeginDate(et_startDate.getText().toString());
+        filter.setBeginDate(mStartDate);
 
         Spinner spinner = (Spinner) view.findViewById(R.id.sp_filter_sortOrder);
         filter.setSortOrder(spinner.getSelectedItem().toString());
@@ -115,4 +130,5 @@ public class FilterFragment extends DialogFragment {
 
         return filter;
     }
+
 }

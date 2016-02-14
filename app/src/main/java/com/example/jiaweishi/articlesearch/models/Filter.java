@@ -1,7 +1,5 @@
 package com.example.jiaweishi.articlesearch.models;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -18,12 +16,8 @@ public class Filter {
         categories = new ArrayList<>();
     }
 
-    public void setBeginDate(String input){
-        try {
-            beginDate = new SimpleDateFormat("MM/dd/yyyy").parse(input);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+    public void setBeginDate(Date date){
+        beginDate = date;
     }
 
     public void setSortOrder(String order){

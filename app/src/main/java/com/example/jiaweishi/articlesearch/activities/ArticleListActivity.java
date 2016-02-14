@@ -1,28 +1,24 @@
 package com.example.jiaweishi.articlesearch.activities;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.widget.Adapter;
-import android.widget.AdapterView;
-import android.widget.GridView;
+import android.widget.DatePicker;
 import android.widget.Toast;
 
 import com.example.jiaweishi.articlesearch.R;
 import com.example.jiaweishi.articlesearch.adapters.ArticleAdapter;
+import com.example.jiaweishi.articlesearch.fragment.DatePickerFragment;
 import com.example.jiaweishi.articlesearch.fragment.FilterFragment;
 import com.example.jiaweishi.articlesearch.fragment.FilterFragmentCallback;
 import com.example.jiaweishi.articlesearch.models.Article;
@@ -38,17 +34,14 @@ import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 
-public class ArticleListActivity extends AppCompatActivity implements FilterFragmentCallback{
+public class ArticleListActivity extends AppCompatActivity implements FilterFragmentCallback,
+        DatePickerDialog.OnDateSetListener{
     private final String TAG = ArticleListActivity.class.getSimpleName();
-
-    //http://api.nytimes.com/svc/search/v2/articlesearch.json?q=new+york
-    // &fq=news_desk:("Sports" "Arts" "Fashion Style")
-    // &begin_date=20160116&end_date=20160201
-    // &api-key=7837482c431734422e608fe4de337f99:2:74353198
 
     private final String baseUrl = "http://api.nytimes.com/svc/search/v2/articlesearch.json";
     private final String apiKey = "7837482c431734422e608fe4de337f99:2:74353198";
@@ -57,6 +50,7 @@ public class ArticleListActivity extends AppCompatActivity implements FilterFrag
     private Filter mFilter = new Filter();
     private String mKeyword = null;
     private ArticleAdapter mAdapter;
+    private boolean dateInfoReceived = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +82,7 @@ public class ArticleListActivity extends AppCompatActivity implements FilterFrag
 
         StaggeredGridLayoutManager gridLayoutManager =
                 new StaggeredGridLayoutManager(4, StaggeredGridLayoutManager.VERTICAL);
+        gridLayoutManager.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_NONE);
         rvArticles.setLayoutManager(gridLayoutManager);
 
         //on scroll listener--support endless scroll
@@ -146,6 +141,34 @@ public class ArticleListActivity extends AppCompatActivity implements FilterFrag
         mFilter = filter;
     }
 
+    @Override
+    public void onDatePickerTriggered() {
+        dateInfoReceived = false;
+
+        DatePickerFragment newFragment = new DatePickerFragment();
+        newFragment.show(getSupportFragmentManager(), "datePicker");
+    }
+
+    @Override
+    public void onDateSet(DatePicker datePicker, int year, int monthOfYear, int dayOfMonth) {
+        // store the values selected into a Calendar instance
+        if(dateInfoReceived)
+            return;
+
+        dateInfoReceived = true;
+        final Calendar c = Calendar.getInstance();
+        c.set(Calendar.YEAR, year);
+        c.set(Calendar.MONTH, monthOfYear);
+        c.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FilterFragment filterDialog = FilterFragment.getInstance(this);
+        filterDialog.setDateInfo(c.getTime());
+        filterDialog.show(fragmentManager, "filter");
+
+    }
+
     private void fetchArticles(String keyword, int page){
         mKeyword = keyword;
 
@@ -197,6 +220,17 @@ public class ArticleListActivity extends AppCompatActivity implements FilterFrag
         }
         requestParams.add("api-key", apiKey);
 
+        String str = "";
+        for(String category : mFilter.getCategories()){
+            str += " \"" + category +"\"";
+        }
+        //remove the first space
+        str.trim();
+
+        if(str.length() > 0){
+            str = "news_desk:(" + str + ")";
+            requestParams.put("fq", str);
+        }
 
         return requestParams;
     }

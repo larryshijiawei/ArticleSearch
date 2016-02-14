@@ -62,7 +62,6 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHold
     }
 
 
-
     private List<Article> mArticles;
     private Context mContext;
 

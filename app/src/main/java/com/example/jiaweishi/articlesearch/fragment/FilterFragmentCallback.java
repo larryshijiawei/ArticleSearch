@@ -7,4 +7,6 @@ import com.example.jiaweishi.articlesearch.models.Filter;
  */
 public interface FilterFragmentCallback {
     public void onFilterSaved(Filter filter);
+
+    public void onDatePickerTriggered();
 }
