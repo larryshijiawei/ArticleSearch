@@ -1,7 +1,10 @@
 package com.example.jiaweishi.articlesearch.activities;
 
 import android.app.DatePickerDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -32,6 +35,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -170,6 +174,12 @@ public class ArticleListActivity extends AppCompatActivity implements FilterFrag
     }
 
     private void fetchArticles(String keyword, int page){
+        //In case device is offline, no Rest call is made
+        if(!isDeviceOnline()){
+            Toast.makeText(getApplicationContext(), "Device is offline !", Toast.LENGTH_LONG).show();
+            return;
+        }
+
         mKeyword = keyword;
 
         AsyncHttpClient client = new AsyncHttpClient();
@@ -192,6 +202,13 @@ public class ArticleListActivity extends AppCompatActivity implements FilterFrag
                 Log.e(TAG, "Error in fetch article, status code " + statusCode);
             }
         });
+    }
+
+    private boolean isDeviceOnline() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
     }
 
 
