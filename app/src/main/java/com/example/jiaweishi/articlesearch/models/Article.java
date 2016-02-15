@@ -47,4 +47,8 @@ public class Article implements Serializable{
     public String getWebUrl(){
         return this.webUrl;
     }
+
+    public boolean hasImageView(){
+        return imageLink != null && imageLink.length() > 0;
+    }
 }

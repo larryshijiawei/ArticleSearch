@@ -20,7 +20,7 @@ import android.widget.DatePicker;
 import android.widget.Toast;
 
 import com.example.jiaweishi.articlesearch.R;
-import com.example.jiaweishi.articlesearch.adapters.ArticleAdapter;
+import com.example.jiaweishi.articlesearch.adapters.ComplexRecycleViewAdapter;
 import com.example.jiaweishi.articlesearch.fragment.DatePickerFragment;
 import com.example.jiaweishi.articlesearch.fragment.FilterFragment;
 import com.example.jiaweishi.articlesearch.fragment.FilterFragmentCallback;
@@ -53,7 +53,7 @@ public class ArticleListActivity extends AppCompatActivity implements FilterFrag
     private List<Article> mArticleList = new ArrayList<>();
     private Filter mFilter = new Filter();
     private String mKeyword = null;
-    private ArticleAdapter mAdapter;
+    private ComplexRecycleViewAdapter mAdapter;
     private boolean dateInfoReceived = false;
 
     @Override
@@ -69,14 +69,12 @@ public class ArticleListActivity extends AppCompatActivity implements FilterFrag
         RecyclerView rvArticles = (RecyclerView) findViewById(R.id.rvArticles);
 
         mArticleList = new ArrayList<>();
-        mAdapter = new ArticleAdapter(getApplicationContext(), mArticleList);
+        mAdapter = new ComplexRecycleViewAdapter(getApplicationContext(), mArticleList);
         rvArticles.setAdapter(mAdapter);
 
-        //listener which triggers the webview
-        mAdapter.setOnItemClickListener(new ArticleAdapter.OnItemClickListener() {
+        mAdapter.setOnItemClickListener(new ComplexRecycleViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
-                Log.d(TAG, "========= on click item " + position);
                 Article selectedArticle = mArticleList.get(position);
                 Intent intent = new Intent(getApplicationContext(), ArticleDetailActivity.class);
                 intent.putExtra("article", selectedArticle);
